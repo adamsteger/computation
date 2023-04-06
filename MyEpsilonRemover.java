@@ -1,13 +1,105 @@
-package computation;
+import java.io.*;
+import java.util.*;
 
 public class MyEpsilonRemover {
 
-    private class NFA {
-        private class States {
-            
-        }
-    }
     public static void main(String[] args) {
-        
+        File file = new File(args[0]);
+        NFA nfa = readFile(file);
+        NFA nfa2 = nfa.removeEMoves();
     }
+
+    private static class NFA {
+        int states;
+        int alphabetSize;
+        int[] acceptingStates;
+        HashMap<Integer, HashMap<Character, ArrayList<Integer>>> transitions;
+
+        NFA(int states, int alphabetSize, int[] acceptingsStates, HashMap<Integer, HashMap<Character, ArrayList<Integer>>> transitions) {
+            this.states = states;
+            this.alphabetSize = alphabetSize;
+            this.acceptingStates = acceptingStates;
+            this.transitions = transitions;
+        }
+
+        public NFA removeEMoves() {
+            NFA nfa = this;
+
+            return nfa;
+        }
+
+
+    }
+
+    /*
+     * Method to convert the input text file to an NFA
+     * @param file the input ascii file that will be read and converted
+     * @return NFA the NFA that will be made from the input file
+     */
+    public static NFA readFile(File file) {
+        NFA nfa = null;
+
+        try {
+            Scanner scanner = new Scanner(file);
+
+            // Parse file to get number of states
+            String numOfStates = scanner.nextLine();
+            String[] stateSplit = numOfStates.split(": ");
+            int states = Integer.parseInt(stateSplit[1]);
+
+            // Parse file to get alphabet size
+            String alphabetString = scanner.nextLine();
+            String[] alphabetSplit = alphabetString.split(": ");
+            int alphabetSize = Integer.parseInt(alphabetSplit[1]);
+
+            // Parse file to get array of accepting states
+            String acceptingString = scanner.nextLine();
+            String[] acceptingSplit = acceptingString.split(": ");
+            String[] arraySplit = acceptingSplit[1].split(" ");
+            int[] acceptingStates = new int[arraySplit.length];
+            for(int i =0; i < acceptingStates.length; i++) {
+                acceptingStates[i] = Integer.parseInt(arraySplit[i]);
+            }
+
+            // Parse file to get transitions of NFA
+            HashMap<Integer, HashMap<Character, ArrayList<Integer>>> transitions = new HashMap<Integer, HashMap<Character, ArrayList<Integer>>>();
+
+            for(int i = 0; i < states; i++) {
+                String line = scanner.nextLine();
+                String[] lineSplit = line.split("}");
+                HashMap<Character, ArrayList<Integer>> transition = new HashMap<>();
+                for(int j = 0; j < lineSplit.length; j++) {
+                    lineSplit[j] = lineSplit[j].replace("{","");
+                    lineSplit[j] = lineSplit[j].replace(" ","");
+                    ArrayList<Integer> transitionStates = new ArrayList<>();
+                    if(lineSplit[j].contains(",") && !lineSplit[j].equals("")) { // Checks to see if there is an array of states in the transition
+                        String[] transitionArraySplit = lineSplit[j].split(",");
+                        for(int k = 0; k < transitionArraySplit.length; k++) {
+                            transitionStates.add(Integer.parseInt(transitionArraySplit[k]));
+                        }
+                    } else if(lineSplit[j].matches("^([1-9]|[1-5][0-9]|6[0-4])$")) { // Regex to match any state number 0-64
+                        transitionStates.add(Integer.parseInt(lineSplit[j]));
+                    }
+                    char c = (char)(j+96);
+                    if(c == '`') c = '$';
+                    transition.put(c,transitionStates);
+                }
+                transitions.put(i, transition);
+            }
+
+            System.out.println(states);
+            System.out.println(alphabetSize);
+            System.out.println(acceptingStates.toString());
+            System.out.println(transitions);
+
+            nfa = new NFA(states, alphabetSize, acceptingStates, transitions);
+            
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return nfa;
+    }
+    
 }
+
