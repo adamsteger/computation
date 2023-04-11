@@ -29,6 +29,7 @@ public class MyEpsilonRemover {
 
         public void removeEMoves() {
             step1();
+            step2();
         }
 
         public void step1() {
@@ -50,6 +51,31 @@ public class MyEpsilonRemover {
             }
         }
 
+        public void step2() {
+            boolean changesInPass = true;
+            while(changesInPass) {
+                changesInPass = false;
+                for(Integer i : transitions.keySet()) {
+                    if(reverse.containsKey(i) && reverse.get(i).containsKey('`')) {
+                        ArrayList<Integer> backStates = reverse.get(i).get('`');
+                        HashMap<Character, ArrayList<Integer>> forwardMoves = transitions.get(i);
+                        for(Integer j : backStates) {
+                            for(Character c : forwardMoves.keySet()) {
+                                for(Integer k : forwardMoves.get(c)) {
+                                    transitions.get(j).get(c).add(k);
+                                    changesInPass = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            for(Integer i : transitions.keySet()) {
+                transitions.get(i).get('`').clear();
+            }
+        }
+
         private HashMap<Integer, HashMap<Character, ArrayList<Integer>>> reverseTransitions(HashMap<Integer, HashMap<Character, ArrayList<Integer>>> transitions) {
             HashMap<Integer, HashMap<Character, ArrayList<Integer>>> reverse = new HashMap<>();
 
@@ -65,7 +91,7 @@ public class MyEpsilonRemover {
                             newEndStates.add(i);
                             newTransition.put(c, newEndStates);
                             reverse.put(j, newTransition);
-                        } else {
+                        } else if(reverse.get(j).containsKey(c)) {
                             reverse.get(j).get(c).add(i);
                         }
                         

@@ -1,0 +1,4 @@
+Build:
+    javac MyEpsilonRemover.java
+Run:
+    java MyEpsilonRemover
