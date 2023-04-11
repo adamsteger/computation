@@ -1,31 +1,100 @@
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MyEpsilonRemover {
 
     public static void main(String[] args) {
         File file = new File(args[0]);
         NFA nfa = readFile(file);
-        NFA nfa2 = nfa.removeEMoves();
+        System.out.println(nfa);
+        nfa.removeEMoves();
+        System.out.println(nfa);
     }
 
     private static class NFA {
         int states;
         int alphabetSize;
-        int[] acceptingStates;
+        ArrayList<Integer> acceptingStates;
         HashMap<Integer, HashMap<Character, ArrayList<Integer>>> transitions;
+        HashMap<Integer, HashMap<Character, ArrayList<Integer>>> reverse;
 
-        NFA(int states, int alphabetSize, int[] acceptingsStates, HashMap<Integer, HashMap<Character, ArrayList<Integer>>> transitions) {
+        NFA(int states, int alphabetSize, ArrayList<Integer> acceptingStates, HashMap<Integer, HashMap<Character, ArrayList<Integer>>> transitions) {
             this.states = states;
             this.alphabetSize = alphabetSize;
             this.acceptingStates = acceptingStates;
             this.transitions = transitions;
+            reverse = this.reverseTransitions(transitions);
         }
 
-        public NFA removeEMoves() {
-            NFA nfa = this;
+        public void removeEMoves() {
+            step1();
+        }
 
-            return nfa;
+        public void step1() {
+            for(int i=0; i < acceptingStates.size(); i++) {
+                HashMap<Character,ArrayList<Integer>> backMoves = new HashMap<>();
+                if(reverse.containsKey(acceptingStates.get(i))) {
+                    backMoves = reverse.get(acceptingStates.get(i));
+                }
+                if(backMoves.containsKey('`')) {
+                    ArrayList<Integer> fromStates = backMoves.get('`');
+                    for(Integer j : fromStates) {
+                        if(!acceptingStates.contains(j)) {
+                            acceptingStates.add(j);
+                        }
+                        
+                    }
+                }
+                
+            }
+        }
+
+        private HashMap<Integer, HashMap<Character, ArrayList<Integer>>> reverseTransitions(HashMap<Integer, HashMap<Character, ArrayList<Integer>>> transitions) {
+            HashMap<Integer, HashMap<Character, ArrayList<Integer>>> reverse = new HashMap<>();
+
+            for(Integer i : transitions.keySet()) {
+                // ArrayList<Integer> newEndStates = new ArrayList<>();
+                HashMap<Character, ArrayList<Integer>> transition = transitions.get(i);
+                for(Character c : transition.keySet()) {
+                    ArrayList<Integer> endStates = transition.get(c);
+                    for(Integer j : endStates) {
+                        if(reverse.get(j) == null) {
+                            HashMap<Character, ArrayList<Integer>> newTransition = new HashMap<>();
+                            ArrayList<Integer> newEndStates = new ArrayList<>();
+                            newEndStates.add(i);
+                            newTransition.put(c, newEndStates);
+                            reverse.put(j, newTransition);
+                        } else {
+                            reverse.get(j).get(c).add(i);
+                        }
+                        
+                    }
+                }
+            }
+            return reverse;
+        }
+
+        public String toString() {
+            String ret = "";
+            ret += "Number of states: " + states + "\n";
+            ret += "Alphabet size: " + alphabetSize + "\n";
+            Collections.sort(acceptingStates);
+            ret += "Accepting states: " + acceptingStates.stream().map(Object::toString).collect(Collectors.joining(" ")) + "\n";
+            for(Integer i : transitions.keySet()) {
+                for(Character c : transitions.get(i).keySet()) {
+                    ArrayList<Integer> states = transitions.get(i).get(c);
+                    ret += "{";
+                    String statesString = states.toString();
+                    statesString = statesString.replace("[","");
+                    statesString = statesString.replace("]","");
+                    statesString = statesString.replace(" ","");
+                    ret += statesString;
+                    ret += "}";
+                }
+                ret += "\n";
+            }
+            return ret;
         }
 
 
@@ -56,9 +125,9 @@ public class MyEpsilonRemover {
             String acceptingString = scanner.nextLine();
             String[] acceptingSplit = acceptingString.split(": ");
             String[] arraySplit = acceptingSplit[1].split(" ");
-            int[] acceptingStates = new int[arraySplit.length];
-            for(int i =0; i < acceptingStates.length; i++) {
-                acceptingStates[i] = Integer.parseInt(arraySplit[i]);
+            ArrayList<Integer> acceptingStates = new ArrayList<>();
+            for(int i =0; i < arraySplit.length; i++) {
+                acceptingStates.add(Integer.parseInt(arraySplit[i]));
             }
 
             // Parse file to get transitions of NFA
@@ -81,16 +150,10 @@ public class MyEpsilonRemover {
                         transitionStates.add(Integer.parseInt(lineSplit[j]));
                     }
                     char c = (char)(j+96);
-                    if(c == '`') c = '$';
                     transition.put(c,transitionStates);
                 }
                 transitions.put(i, transition);
             }
-
-            System.out.println(states);
-            System.out.println(alphabetSize);
-            System.out.println(acceptingStates.toString());
-            System.out.println(transitions);
 
             nfa = new NFA(states, alphabetSize, acceptingStates, transitions);
             
