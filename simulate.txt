@@ -1,0 +1,4 @@
+Build:
+    javac MyNFASimulator.java
+Run:
+    java MyNFASimulator
