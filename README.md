@@ -4,8 +4,8 @@ This repository contains code for a project in CSCE 355:Foundation of Computatio
 
 # Build Instructions
 To run the e-NFA to NFA conversion, first run the following commands in a terminal.
-  `git clone https://github.com/adamsteger/computation.git`
-  `cd computation`
+<br>  `git clone https://github.com/adamsteger/computation.git`
+<br>  `cd computation`
   
 Then, compile the code with the following command:
   `javac MyEpsilonRemover.java`
