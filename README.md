@@ -8,17 +8,17 @@ To run the e-NFA to NFA conversion, first run the following commands in a termin
 <br>  `cd computation`
   
 Then, compile the code with the following command:
-  `javac MyEpsilonRemover.java`
+<br>  `javac MyEpsilonRemover.java`
   
 Finally, to run the code, use the following command:
-  `java MyEpsilonRemover test.txt`
+<br>  `java MyEpsilonRemover test.txt`
 
 
 Likewise, to run the simulator, compile the code with the following command:
-  `javac MyNFASimulator.java`
+<br>  `javac MyNFASimulator.java`
   
 Then, to run the code, use the following command:
-  `java MyNFASimulator test.txt`
+<br>  `java MyNFASimulator test.txt`
 
 To test the code, enter a string and the program will print out "accept" if the NFA accepts the input and "reject" if the NFA rejects the input. Finally, press Ctrl-C to terminate the program.
 
