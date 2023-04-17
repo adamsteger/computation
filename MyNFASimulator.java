@@ -5,7 +5,6 @@ public class MyNFASimulator {
     public static void main(String[] args) {
         File file = new File(args[0]);
         NFA nfa = NFA.readFile(file);
-        System.out.println(nfa);
         Scanner scanner = new Scanner(System.in);
         while(true) {
             String input = scanner.nextLine();
